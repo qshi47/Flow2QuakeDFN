@@ -1,16 +1,16 @@
 # Flow2QuakeDFN
-Flow2QuakeDFN aims at simulating the fault ruptures in realistic stresses region.
+Flow2QuakeDFN aims at simulating the fault ruptures under realistic poroelastic stresses region.
 
 [TOC]
 
-## Step1: Initialize fault 
+## Step 1: Intialize  Geometry fault & cubes of the reservoir.
+    python ./Generate_Mesh_Buijze.py
+
+## Step 2: Initialize fault 
     julia ./InputGeometryExamples/Buijze19_BuildGeometry_Single_Normal.jl
 
-## Step 2: Discritize fault & Calculate Okada GF functionbetween fault patches
+## Step 3: Discritize fault & Calculate Okada GF functionbetween fault patches
     julia ./RUN_BUILD_INPUT.jl
-
-## Step 3: Generate cubes of the reservoir.
-    julia ./Generate_Mesh_Buijze.py
 
 ## Step 4: Calculate external poroelastic stresses on each fault patch
     julia ./ExternalStressCalculationExamples/Buijze_PoroStress.jl

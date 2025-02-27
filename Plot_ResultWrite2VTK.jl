@@ -3,38 +3,6 @@ using WriteVTK
 using StaticArrays
 using ProgressBars
 
-"""
-
-ResultName="Result"
-FileName="Results/" * ResultName * ".jld2"
-FileNameInput="Results/" * ResultName * "_Input.jld2"
-LoadingInputFileName="Input_Discretized.jld2" 
-OutputVTKFile = "Results/" * ResultName * ".vts"
-
-FaultCenter= load(LoadingInputFileName, "FaultCenter")
-
-ResultTime, ResultV, ResultDisp, Result_NormalStress, History_Theta =
-load(FileName,"History_Time", "History_V", "History_Disp", "History_NormalStress","History_Theta")
-
-
-coordinates = [SVector(row...) for row in eachrow(FaultCenter)]
-vtk = vtk_grid(OutputVTKFile, coordinates )
-
-
-vtk["ResultTime"] = ResultTime
-vtk["ResultV"] = ResultV
-vtk["ResultDisp"] = ResultDisp
-vtk["Result_NormalStress"] = Result_NormalStress
-
-
-# Save the file
-vtk_save(vtk)
-
-println("[DONE]")
-"""
-
-
-
 function write_pvd(pvd_filename, vts_filenames, result_time)
     """
     Write a `.pvd` file to link multiple `.vts` files for time series data.
@@ -82,7 +50,6 @@ function write_time_series_vtk(base_filename, coordinates, result_data, result_t
 
         # Add scalar data for this time step
         vtk["ResultTime"] = result_time[t]/Year_in_Second
-        # vtk["TIME"] = result_data["ResultTime"][t, :]
         vtk["ResultV"] = result_data["ResultV"][t, :]
         vtk["ResultDisp"] = result_data["ResultDisp"][t, :]
         vtk["Result_NormalStress"] = result_data["Result_NormalStress"][t, :]
@@ -151,4 +118,4 @@ function write_result_to_vtk_files(OutputFolder)
 end
 
 
-write_result_to_vtk_files("Results/fs0.6_fr0.35_Wsw0.0075_Vr_1e-1_Vp1e-6_res10/")
+write_result_to_vtk_files("Results/fs0.6_fr0.35_Wsw0.00375_Vr_1e-1_Vp1e-6_res10/")
