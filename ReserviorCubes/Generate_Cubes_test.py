@@ -1,4 +1,4 @@
-from Generate_Mesh_Buijze import is_point_in_triangle
+from ReserviorCubes.Generate_Cubes_Buijze import is_point_in_triangle
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -30,13 +30,14 @@ include("../Qian/Utilities_GRG.jl")
 include("../Functions_Buijze_InitialStress.jl")
 
 println("---- Loading ----")
-LoadingBuijzeGeomery = "Input_Buijze19_Geometry.jld2"
 LoadingInputFileName="Input_Discretized.jld2" 
 
-ReservoirCubesCoordFileName = "Input_Buijze19_Cubes.h5"
+LoadingBuijzeGeomery = "Input_Buijze19_Geometry.jld2"
+LoadingReservoirCubesCoord = "Input_Buijze19_Cubes.h5"
 
-OutputFile="Input_ExternalStressChange.jld2"
-OutputVTKFileName = "Buijze19_50_FaultStress"
+
+OutputFile        = "Input_ExternalStressChange.jld2"
+OutputVTKFileName = "Buijze19_50_FaultStress.vts"
 
 # OutputFile_Reservoir_Shape = "Input_Reservoir_Shape.jld2"
 # OutputFile_Reservoir_Center = "Input_Reservoir_Center.h5"
@@ -63,14 +64,14 @@ LoadingFaultCount= load(LoadingInputFileName, "LoadingFaultCount")
 Switch_StrikeSlip_or_ReverseNormal = load(LoadingInputFileName, "Switch_StrikeSlip_or_ReverseNormal")
 
 # Load Reservoir cubes data
-CubesFile = h5open( ReservoirCubesCoordFileName, "r" )
+CubesFile = h5open( LoadingReservoirCubesCoord, "r" )
 BLOCKS = read( CubesFile["cubes"] )
 BLOCKS = permutedims(BLOCKS, (3, 2, 1))
 close(CubesFile)
 
 BlocksCount = size(BLOCKS)[1]
 Reservoir_BLOCKS_Vertices_Pos = collect(eachslice(BLOCKS, dims=1))
-
+println("Block count number is:  ", BlocksCount)
 
 
 # Load Reservoir Basic Geometry Info
