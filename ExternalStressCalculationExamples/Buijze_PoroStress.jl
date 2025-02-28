@@ -10,11 +10,9 @@ using DelimitedFiles
 using JLD2
 using LinearAlgebra
 using Printf
-# using PyPlot
 using PyCall
 using Statistics
 
-# New, added by Qian
 using ProgressBars
 using SpecialFunctions: expinti
 using HDF5
@@ -24,28 +22,20 @@ using WriteVTK
 using StaticArrays
 
 
-println("---- Pre-loading ----")
 include("../Results/Functions_Plot.jl")
 include("../Qian/Utilities_GRG.jl")
 include("../Functions_Buijze_InitialStress.jl")
 
-println("---- Loading ----")
+println("---- loading ----")
 LoadingInputFileName="Input_Discretized.jld2" 
 
 LoadingBuijzeGeomery = "Input_Buijze19_Geometry.jld2"
 LoadingReservoirCubesCoord = "Input_Buijze19_Cubes.h5"
 
-
 OutputFile        = "Input_ExternalStressChange.jld2"
 OutputVTKFileName = "Buijze19_50_FaultStress.vts"
 
-# OutputFile_Reservoir_Shape = "Input_Reservoir_Shape.jld2"
-# OutputFile_Reservoir_Center = "Input_Reservoir_Center.h5"
-# OutputFile_Reservoir_Vertices = "Input_Reservoir_Vertices.h5"
- 
-
-############################### Load Input Files ###############################
-######++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++######
+# Load Input Files 
 FaultCenter= load(LoadingInputFileName, "FaultCenter")
 ShearModulus= load(LoadingInputFileName, "ShearModulus")
 RockDensity= load(LoadingInputFileName, "RockDensity")
@@ -62,6 +52,7 @@ FaultLengthDip_Bulk= load(LoadingInputFileName, "FaultLengthDip_Bulk")
 FaultCount= load(LoadingInputFileName, "FaultCount") 
 LoadingFaultCount= load(LoadingInputFileName, "LoadingFaultCount") 
 Switch_StrikeSlip_or_ReverseNormal = load(LoadingInputFileName, "Switch_StrikeSlip_or_ReverseNormal")
+println("Fault count number is:  ", FaultCount)
 
 # Load Reservoir cubes data
 CubesFile = h5open( LoadingReservoirCubesCoord, "r" )
@@ -75,19 +66,13 @@ println("Block count number is:  ", BlocksCount)
 
 
 # Load Reservoir Basic Geometry Info
-Offset = load(LoadingBuijzeGeomery, "Offset")
+Offset = load(LoadingBuijzeGeomery, "Offset") # m
 Phi =   load(LoadingBuijzeGeomery, "Phi")   # deg
+println("Offset is: ", Offset, " m")        
+println("Phi is: ", Phi, " deg")
 
 
-# function Time_with_Timestep(time_idx)
-#     # return in second
-#     return 0.001*1.2^i
-#     # 100 ~ 0.002 yr
-#     # 110 ~ 0.016 yr
-#     # 120 ~ 0.1 yr
-#     # 150 ~ 24 yr
-# end
-
+# Specify time inverval
 function Time_with_Timestep(time_idx)
     # return in second
     Year_in_Second = 3600*24*365
@@ -97,23 +82,25 @@ function Time_with_Timestep(time_idx)
 end
 
 
-TimeCount =  200 # 150, 6
+TimeCount =  200
 ExternalStress_TimeArray = zeros(TimeCount)
 for i=1:TimeCount
     ExternalStress_TimeArray[i]= Time_with_Timestep(i) # seconds 
 end
 
 
-
+# Reservoir Elastic Properties
 MyPossionRatio = 0.15 # 0.15
 MyYoungModulus = 15e9
 MyBulkModulus = MyYoungModulus/( 3*(1-2*MyPossionRatio) )
 MyPwaveMudulus = MyYoungModulus*(1-MyPossionRatio)/( (1+MyPossionRatio)*(1-2*MyPossionRatio) )
 MyShearModulus = MyYoungModulus/(2*MyPossionRatio+2)
 
+MyCompressibility = 1/MyPwaveMudulus * ones(BlocksCount)
 
 
-# >>>> Calculate Uniform Pore Pressure Change >>>>
+
+# Uniform Pore Pressure Change
 println("---- Calculate Uniform Pore Pressure Change ----")
 UniformPorePressureChange = zeros(TimeCount)
 EndExternalPorePressure = -40e6
@@ -126,8 +113,11 @@ for (time_idx, time) in enumerate(ExternalStress_TimeArray)
     UniformPorePressureChange[time_idx] = PorePressureExtractionRate*time
 end
 
+
+"""
 Delta_P = UniformPorePressureChange .* ones( TimeCount, BlocksCount )
 Cm_Delta_P = 1/MyPwaveMudulus*Delta_P
+"""
 
 function IF_FaultPatch_on_Reservoir(SingleFaulteCenter, time)
     If_faultpatch_on_reservoir = 0 # false
@@ -136,7 +126,7 @@ function IF_FaultPatch_on_Reservoir(SingleFaulteCenter, time)
    if (SingleFaulteCenter[3] >= 2800) & (SingleFaulteCenter[3] <= 3000 + Offset)
         If_faultpatch_on_reservoir = 1
         timeidx = findfirst( ExternalStress_TimeArray .== time)
-        PorePressureChange = Delta_P[timeidx, 1]
+        PorePressureChange = UniformPorePressureChange[timeidx] # Delta_P[timeidx, 1]
    end
 
    return If_faultpatch_on_reservoir, PorePressureChange
@@ -144,7 +134,7 @@ function IF_FaultPatch_on_Reservoir(SingleFaulteCenter, time)
 end
 
 
-# >>>> All Stresses on Fault >>>>
+# Stresses on Fault
 TotalPlotFault=FaultCount
 TimeArrayCount=length(ExternalStress_TimeArray)
 
@@ -152,7 +142,6 @@ ExternalStress_Normal = zeros(TimeArrayCount,TotalPlotFault)
 ExternalStress_Shear  = zeros(TimeArrayCount,TotalPlotFault)
 PorePressure          = zeros(TimeArrayCount,TotalPlotFault)
 
-# >>>> Initial Stress >>>>
 println("---- Calculate Initial Stress on Fault ----")
 ExternalStress_Normal_Initial = zeros(TimeArrayCount,TotalPlotFault)
 ExternalStress_Shear_Initial  = zeros(TimeArrayCount,TotalPlotFault)
@@ -168,7 +157,7 @@ end
 
 
 
-# >>>> Poro-elastic Stress >>>>
+# Poro-elastic Stress
 println("---- Calculating Poro Elastic Stresses on Fault ----")
 ExternalStress_Normal_Poro = zeros(TimeArrayCount,TotalPlotFault)
 ExternalStress_Shear_Poro  = zeros(TimeArrayCount,TotalPlotFault)
@@ -221,11 +210,26 @@ function CalculatePoroStress_on_Fault(sigEff_all, FaultDipAngle, FaultStrikeAngl
 end
 
 
+PoroDisp_time_patch_GF   = zeros(3, TotalPlotFault)
+PoroStress_time_patch_GF = zeros(6, TotalPlotFault)
+
+for i = tqdm( 1:TotalPlotFault, unit = " fault patch" )
+    PoroDisp_time_patch_GF[:,i], PoroStress_time_patch_GF[:,i] = Calculate_PoroDispStress_MultipleBlocks_GF(FaultCenter[i,:], Reservoir_BLOCKS_Vertices_Pos, MyCompressibility, MyShearModulus, MyPossionRatio  )
+end
+
+
+
 for (TimeIdx, Time) in tqdm( enumerate(ExternalStress_TimeArray), unit = " timestep" )
     for i =1:TotalPlotFault
         # All stress convention: compress positive
-        PoroDisp_time_patch, PoroStress_time_patch = Calculate_DispStress_MultipleBlocks(FaultCenter[i,:], Reservoir_BLOCKS_Vertices_Pos, Cm_Delta_P[TimeIdx,:], MyShearModulus, MyPossionRatio  )
         
+        """
+        PoroDisp_time_patch, PoroStress_time_patch = Calculate_DispStress_MultipleBlocks(FaultCenter[i,:], Reservoir_BLOCKS_Vertices_Pos, Cm_Delta_P[TimeIdx,:], MyShearModulus, MyPossionRatio  )
+        """
+
+        PoroDisp_time_patch   = UniformPorePressureChange[TimeIdx]*PoroDisp_time_patch_GF[:,i]
+        PoroStress_time_patch = UniformPorePressureChange[TimeIdx]*PoroStress_time_patch_GF[:,i]
+
         PoroDisp_1[TimeIdx,i]   = PoroDisp_time_patch[1] 
         PoroDisp_2[TimeIdx,i]   = PoroDisp_time_patch[2] 
         PoroDisp_3[TimeIdx,i]   = PoroDisp_time_patch[3] 
@@ -312,8 +316,7 @@ save(OutputFile,
 "PorePressure", PorePressure,
 "PorePressure_Initial", PorePressure_Initial,
 "PorePressure_Poro", PorePressure_Poro,
-"Delta_P", Delta_P,
-"Cm_Delta_P", Cm_Delta_P,
+"UniformPorePressureChange", UniformPorePressureChange,
 "PoroStress_11", PoroStress_11,
 "PoroStress_22", PoroStress_22,
 "PoroStress_33", PoroStress_33,
@@ -324,19 +327,11 @@ save(OutputFile,
 "PoroDisp_2",   PoroDisp_2,
 "PoroDisp_3",   PoroDisp_3)
 
-# save(OutputFile_Reservoir_Shape, 
-# "Reservoir_BLOCKS_Origin_Pos", Reservoir_BLOCKS_Origin_Pos,
-# "Reservoir_BLOCKS_Vertices_Pos", Reservoir_BLOCKS_Vertices_Pos)
-
-
-
-
-# >>>> Write to VTK File >>>>
+# Write to VTK File 
 println("---- Saving File: ", OutputVTKFileName, " ----" )
 coordinates = [SVector(row...) for row in eachrow(FaultCenter)]
 vtk = vtk_grid(OutputVTKFileName, coordinates )
 
-# Add scalar data for each point
 vtk["ExternalStress_Shear_Poro"] = ExternalStress_Shear_Poro
 vtk["ExternalStress_Shear"] = ExternalStress_Shear
 vtk["ExternalStress_Normal_Poro"] = ExternalStress_Normal_Poro
@@ -346,7 +341,6 @@ vtk["PorePressure"] = PorePressure
 vtk["PoroStress_11"] = PoroStress_11
 vtk["PoroStress_33"] = PoroStress_33
 
-# Save the file
 vtk_save(vtk)
 
 
