@@ -57,7 +57,7 @@ if __name__ == "__main__":
     Thickness = 2000 # meter
     Height = 200 # meter
     offset = 0.0 # 0.0 | 50.0 # meter
-    Cube_Size_2D = 1 # meter
+    Cube_Size_2D = 4 # meter
     
     Phi_rad = Phi*np.pi/180
     BigCubeLength = 2000-0.5*((Height+offset)/np.tan(Phi_rad))
@@ -74,22 +74,31 @@ if __name__ == "__main__":
     RightTriangleP4 = [4000-BigCubeLength, 2800]
     RightTriangleP5 = [4000-BigCubeLength - Height/np.tan(Phi_rad), 3000]
     RightTriangleP6 = [4000-BigCubeLength, 3000]
-  
+    
+    
     # Vertices of all cube 
     cube_big_left =  [get_cube_vertices(LeftBigCubeCenterX, LeftBigCubeCenterZ, BigCubeLength, Height, Thickness)]
     cube_big_right = [get_cube_vertices(RightBigCubeCenterX, RightBigCubeCenterZ, BigCubeLength, Height, Thickness)]
     cubes_left =  Generate_LeftTriangle_Cylinder_Vertices(Cube_Size_2D, LeftTriangleP1, LeftTriangleP2, LeftTriangleP3, Thickness)
     cubes_right = Generate_RightTriangle_Cylinder_Vertices(Cube_Size_2D, RightTriangleP4, RightTriangleP5, RightTriangleP6, Thickness)
     cubes_all = np.vstack( (cube_big_left[0][np.newaxis,:,:], cubes_left, cubes_right, cube_big_right[0][np.newaxis,:,:] ) )
-
+    
 
     """
+    # Two blocks
     # Dip = 70 deg, Offset = 0
     cube_big_left =  [get_cube_vertices(1000, 2900, cube_len_x=2000, cube_len_z=200, thickness=Thickness)]
     cube_big_right = [get_cube_vertices(3000, 2900, cube_len_x=2000, cube_len_z=200, thickness=Thickness)]
     cubes_all = np.vstack( (cube_big_left[0][np.newaxis,:,:], cube_big_right[0][np.newaxis,:,:] ) )
     """
-    
+
+    """
+    # One big block
+    # Dip = 70 deg, Offset = 0
+    cube_big_one =  [get_cube_vertices(2000, 2900, cube_len_x=4000, cube_len_z=200, thickness=Thickness)]
+    cubes_all = np.array(cube_big_one)
+    """
+
     # Fault parameters 
     FaultCenterX,FaultCenterY,FaultCenterZ = (LeftTriangleP2[0]+RightTriangleP4[0])/2, Thickness/2, (LeftTriangleP2[1]+RightTriangleP4[1])/2
     FaultNormal = [np.sin(Phi_rad), 0, np.cos(Phi_rad)]

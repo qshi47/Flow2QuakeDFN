@@ -26,7 +26,7 @@ include("../Results/Functions_Plot.jl")
 include("../Qian/Utilities_GRG.jl")
 include("../Functions_Buijze_InitialStress.jl")
 
-println("---- loading ----")
+println("---- Loading ----")
 LoadingInputFileName="Input_Discretized.jld2" 
 
 LoadingBuijzeGeomery = "Input_Buijze19_Geometry.jld2"
