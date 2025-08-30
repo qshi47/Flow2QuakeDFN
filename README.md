@@ -27,7 +27,7 @@ You can check the positinos of all the reservoir cubes via the *Input_Example_Cu
 Assign the time and changes in pore pressure within each reservoir cuboid. 
 
 ```
-julia PorePressureExamples/Example_Generate_Cubes.jl
+julia PorePressureExamples/Example_Injection.jl
 ``` 
 
 You can check the pore pressure changes at each time in each reservoir cube in the *Input_Example_PorePressureChange.csv* file.
