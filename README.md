@@ -5,6 +5,11 @@ This project focuses on simulating earthquake rupture in response to the change 
 
 <video controls src="injection_rupture.mp4" title="Title"></video>
 
+
+https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
+
+
+
 ## Workflow
 ### Reservoir Mesh Generation
 Create a computational mesh for the reservoir. In this example, the reservoir consists of 40*40 **cuboids** meshes.
