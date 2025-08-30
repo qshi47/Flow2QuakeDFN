@@ -2,4 +2,4 @@ __pycache__/
 .vscode/
 Input_Discretized.jld2
 Input_ExternalStressChange.jld2
-Results/Result.jld2
+Results/Result_Example.jld2
