@@ -1,23 +1,27 @@
 # Flow2QuakeDFN
+> [!WARNING]
+> **Early Stage.** This is not a formal release. We're still working on a refined version. 
+> 
+> **Outdated Quake-DFN Version.** This is based on [Quake-DFN](https://github.com/limkjae/Quake-DFN) V1.0, not the most recent version of [Quake-DFN](https://github.com/limkjae/Quake-DFN).
 
 ## Introduction
-This project focuses on simulating earthquake rupture in response to the change in pore pressure of reservoir. The physics underlying this process involves the coupling between pore pressure, poro-elastic stress, and rate-and-state fault dynamics. We'll use the case `Example` to demonstrate the whole workflow, where fluid is injected to a flat reservoir and induce earthquake rupture on a flat dipping fault offsetting to the injection point. The below movie showcase the above physical process and will be produced at the end of the workflow.
+This project simulates earthquake rupture driven by changes in reservoir pore pressure. The physics underlying involves the coupling between reservoir pore pressure, poro-elastic stress, and rate-and-state fault dynamics. We use the case `Example` to demonstrate the workflow: fluid is injected into a flat reservoir and induces rupture on a planar, dipping fault offset from the injection point. The movie below illustrates the coupled processes and is produced at the end of the workflow.
 
 <video controls src="injection_rupture.mp4" title="Title"></video>
-
 
 https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
 
 ## Dependencies
-- Python 3.10+
+- **Python** 3.10+
 - Packages: numpy, matplotlib, pyvista, tqdm, h5py
-- Julia 1.11+
+- **Julia** 1.11+
 - Packages: Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
+
+A detailed description of how to install the Julia packages is in [QuakeDFN_UserGuide.pdf](QuakeDFN_UserGuide.pdf)
 
 ## Workflow
 ### Reservoir Mesh 
-Create a computational mesh for the reservoir. In this example, the reservoir consists of 40*40 **cuboids** meshes.
-
+Create a computational mesh for the reservoir. In this example, the reservoir consists of a 40 × 40 grid of **cuboid** elements.
 ```
 python ReservoirMeshExamples/Example_Generate_Cubes.py
 ```
@@ -28,19 +32,19 @@ You can check the positions of all the reservoir cubes via the *Input_Example_Cu
 ![alt text](image_cubes.png)
 
 ### Reservoir Pore Pressure
-Assign the time and changes in pore pressure within each reservoir cuboid. 
+Assign the time and pore pressure change for each reservoir cuboid. 
 
 ```
 julia PorePressureExamples/Example_Injection.jl
 ``` 
 
-You can check the pore pressure changes at each time in each reservoir cube in the *Input_Example_PorePressureChange.csv* file.
+You can check the pore pressure changes at each time in each reservoir cube in *Input_Example_PorePressureChange.csv*.
 
 ![alt text](image_porepressure.png)
 
 
 ### Fault Geometry
-Build bulk fault geometry.
+Build the bulk fault geometry.
 
 ```
 julia InputGeometryExamples/Example_BuildGeometry_Single_Normal.jl
@@ -52,7 +56,7 @@ julia RUN_BUILD_INPUT.jl
 ```
 
 ### Fault Initial Stress
-The initial shear&normal stresses on each fault patch are set in *QuickParameterAdjust.jl* file. This file will be implemented automatically when running the QuakeDFN simulation `RUN_QUAKEDFN.jl`.
+Set the initial shear&normal stresses on each fault patch in *QuickParameterAdjust.jl*. This file is executed automatically when running the QuakeDFN simulation `RUN_QUAKEDFN.jl`.
 
 ### Fault Poro-elastic Stress Change
 Compute the resulting poroelastic stress changes on each fault patch at each (prescribed) time step. 
@@ -72,6 +76,7 @@ julia RUN_QUAKEDFN.jl
 ```
 
 ### Post-processing (Paraview)
+Write results to VTK files for visualization in ParaView.
 ```
 julia Plot_ResultWrite2VTK.jl
 ```
