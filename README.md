@@ -19,7 +19,7 @@ python ReservoirMeshExamples/Example_Generate_Cubes.py
 ```
 
 
-You can check the positinos of all the reservoir cubes via the *Input_Example_Cubes.txt* file:
+You can check the positions of all the reservoir cubes via the *Input_Example_Cubes.txt* file:
 
 ![alt text](image_cubes.png)
 
@@ -57,7 +57,7 @@ julia RUN_BUILD_INPUT.jl
 ```
 
 ### Initial Stress
-We have to set the initial shear&normal stresses on each fault patch. The systematic approach to do it is to modify the *QuickParameterAdjust.jl* file. This file will be implemented automatically when running the QuakeDFN simulation.
+The initial shear&normal stresses on each fault patch are set in *QuickParameterAdjust.jl* file. This file will be implemented automatically when running the QuakeDFN simulation.
 
 ### QuakeDFN Simulation
 ```
