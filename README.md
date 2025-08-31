@@ -1,6 +1,6 @@
 # Flow2QuakeDFN
 > [!WARNING]
-> **Early Stage.** This is not a formal release. We're still working on a refined version. 
+> **Early Stage Code.** This is not a formal release. We're still working on a refined version. 
 > 
 > **Outdated Quake-DFN Version.** This is based on [Quake-DFN](https://github.com/limkjae/Quake-DFN) V1.0, not the most recent version of [Quake-DFN](https://github.com/limkjae/Quake-DFN).
 
@@ -15,7 +15,7 @@ https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
 - **Python** 3.10+
 - Packages: numpy, matplotlib, pyvista, tqdm, h5py
 - **Julia** 1.11+
-- Packages: Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
+- Packages: Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, PolyLog, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
 
 A detailed description of how to install the Julia packages is in [QuakeDFN_UserGuide.pdf](QuakeDFN_UserGuide.pdf)
 
@@ -61,11 +61,13 @@ Set the initial shear&normal stresses on each fault patch in *QuickParameterAdju
 ### Fault Poro-elastic Stress Change
 Compute the resulting poroelastic stress changes on each fault patch at each (prescribed) time step. 
 
+
 ```
 julia ExternalStressCalculationExamples/Example_PoroStress.jl
 ```
 
-*Plot_InitialStress.ipynb* file provides the necessary codes to visualize the computed external shear and effective normal stress.
+This generates the *Input_ExternalStressChange.jld2* file, which contains the computed fault external shear and effective normal stress. *Plot_InitialStress.ipynb* file provides the necessary code to visualize these external stresses. 
+
 ![alt text](image_tau.png)
 ![alt text](image_sigma.png)
 
