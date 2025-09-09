@@ -74,21 +74,14 @@ end
 
 function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File, Output_ExternalStress_File)
     # Load Fault parameters
+    println("---- Loading Fault and Cuboids  ----")
     FaultCenter= load(Input_Fault_File, "FaultCenter")
     ShearModulus= load(Input_Fault_File, "ShearModulus")
-    RockDensity= load(Input_Fault_File, "RockDensity")
     PoissonRatio= load(Input_Fault_File, "PoissonRatio")
-    FaultLengthStrike= load(Input_Fault_File, "FaultLengthStrike")
-    FaultLengthDip= load(Input_Fault_File, "FaultLengthDip")
     FaultStrikeAngle= load(Input_Fault_File, "FaultStrikeAngle")
     FaultDipAngle= load(Input_Fault_File, "FaultDipAngle")
     FaultLLRR= load(Input_Fault_File, "FaultLLRR")
-
-    Fault_BulkIndex= load(Input_Fault_File, "Fault_BulkIndex")
-    FaultLengthStrike_Bulk= load(Input_Fault_File, "FaultLengthStrike_Bulk")
-    FaultLengthDip_Bulk= load(Input_Fault_File, "FaultLengthDip_Bulk")
     FaultCount= load(Input_Fault_File, "FaultCount") 
-    LoadingFaultCount= load(Input_Fault_File, "LoadingFaultCount") 
     Switch_StrikeSlip_or_ReverseNormal = load(Input_Fault_File, "Switch_StrikeSlip_or_ReverseNormal")
     println("Fault count is:  ", FaultCount)
 
@@ -97,18 +90,14 @@ function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, 
     Cuboids_Vertices = Calculate_Cuboids_Vertices(Cuboids_Count, Cuboids_Center, Cuboids_Length)
     println("Reservoir cuboid count is:  ", Cuboids_Count)
 
-    # Load time array and pore pressure change 
+    # Load external time array and pore pressure change 
     # from CSV, skipping header
     ExternalStress_TimeArray = readdlm(Input_PorePressure_File, ',', skipstart=1)[:,1]
     PorePressureChange = readdlm(Input_PorePressure_File, ',', skipstart=1)[:,2:end]
 
     # Reservoir Elastic Properties
-    MyPossionRatio = 0.15
-    MyYoungModulus = 15e9
-    MyBulkModulus = MyYoungModulus/( 3*(1-2*MyPossionRatio) )
-    MyPwaveModulus = MyYoungModulus*(1-MyPossionRatio)/( (1+MyPossionRatio)*(1-2*MyPossionRatio) )
-    MyShearModulus = MyYoungModulus/(2*MyPossionRatio+2)
-    MyCompressibility = 1/MyPwaveModulus
+    PwaveModulus = 2 * ShearModulus * (1 - PoissonRatio) / (1 - 2 * PoissonRatio)
+    Compressibility = 1/PwaveModulus
 
     # External Poro-elastic Stress Change on Fault 
     # (initial stresses are assigned in QuickParameterChange.jl) 
@@ -137,7 +126,7 @@ function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, 
 
     for i =  tqdm( 1:FaultCount, unit = "fault patch" )
         for j = 1:Cuboids_Count
-            PoroDisp_GF_patch_cuboid[:,i,j], PoroStress_GF_patch_cuboid[:,i,j] = Calculate_PoroDispStress_SingleBlock_FullSpace_GF(FaultCenter[i,:], Cuboids_Vertices[j], MyCompressibility, MyShearModulus, MyPossionRatio  )
+            PoroDisp_GF_patch_cuboid[:,i,j], PoroStress_GF_patch_cuboid[:,i,j] = Calculate_PoroDispStress_SingleBlock_FullSpace_GF(FaultCenter[i,:], Cuboids_Vertices[j], Compressibility, ShearModulus  )
         end
     end
 
