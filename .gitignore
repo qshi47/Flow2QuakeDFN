@@ -8,5 +8,7 @@ Results/Result.jld2
 Results/Result_Example.jld2
 Plot_InitialStress.ipynb
 Plot_ResultSlip.ipynb
+Plot_ResultV.ipynb
+Plot_ResultWrite2VTK.jl
 *.png
 *.mp4
