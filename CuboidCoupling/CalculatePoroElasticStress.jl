@@ -231,7 +231,7 @@ Output_ExternalStress_File = "Input_ExternalStressChange.jld2"
 
 
 function Criterion_for_Fault_within_Reservoir(SingleFaultCenter)
-    return (SingleFaultCenter[3] >= 3900) & (SingleFaultCenter[3] <= 4100 )
+    return (SingleFaultCenter[3] >= 2900) & (SingleFaultCenter[3] <= 3100 )
 end
 
 main(Criterion_for_Fault_within_Reservoir, Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File, Output_ExternalStress_File)

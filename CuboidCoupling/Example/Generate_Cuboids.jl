@@ -72,8 +72,8 @@ function main(OutputCubesTXTFilename)
     println("---- Generating Single Cuboid Mesh ----")
 
     # Reservoir parameters
-    Center    = (0.0,0.0, 4000.0)
-    LengthX   = 2000.0
+    Center    = (0.0,0.0, 3000.0)
+    LengthX   = 4000.0
     LengthY   = 2000.0
     Thickness = 200.0
 

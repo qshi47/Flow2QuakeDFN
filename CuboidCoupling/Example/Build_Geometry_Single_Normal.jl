@@ -15,7 +15,7 @@ function BuildBulk()
     StrikeAngle = 90.0 # deg
     FaultCenterX = 0
     FaultCenterY = 0
-    FaultCenterZ = 4000
+    FaultCenterZ = 3000
     LengthDip = 800
     LengthStrike = 2000
 

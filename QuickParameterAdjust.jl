@@ -6,11 +6,11 @@ using PolyLog
 function SetInitialStress_Example!(FaultCount, fault_center, fault_normalStress, fault_friction_i)
     for i=1:FaultCount
         if (fault_center[i,3] >= 3900) & (fault_center[i,3] <= 4100)
-            fault_normalStress[i] = 15e6
-            fault_friction_i[i] = 0.7
+            fault_normalStress[i] = 13e6
+            fault_friction_i[i] = 0.4
         else
-            fault_normalStress[i] = 20e6
-            fault_friction_i[i] = 0.6
+            fault_normalStress[i] = 15e6
+            fault_friction_i[i] = 0.4
         end
     end
 
@@ -37,6 +37,29 @@ function SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fau
     return Fault_Dc, Fault_Theta_i, Fault_V_i
 
 end
+
+function SetInitialRSParameters_Buijze19!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
+    Fault_fr = 0.45
+    Fault_fs = 0.60
+    Fault_Wsw = 0.03 # (Fault_fs-Fault_fr)/5 # unit: mm^-1
+    Fault_Dsw = (Fault_fs-Fault_fr)/Fault_Wsw*1e-3 # unit: m
+    Fault_Vr = 1e-1  # 1e-1
+    Fault_Vp = 1e-6  # 1e-6
+    Fault_V0 = 1e-9
+    println("Fr:", Fault_fr, " Fs:", Fault_fs, " Dsw:", Fault_Dsw*1e3, "mm Vr:", Fault_Vr, " Vp:", Fault_Vp, " V0:", Fault_V0)
+
+    Fault_Gc = 0.5*(Fault_fs-Fault_fr)*Fault_Dsw 
+    Fault_Dc = (Fault_Gc)./(Fault_b_Original*( -reli2(1-exp((Fault_fs-Fault_fr)/Fault_b_Original[1])) ))
+    Fault_f0 = Fault_fr.-(Fault_a_Original-Fault_b_Original).*log(Fault_Vr/Fault_V0)
+    Fault_Theta_i = Fault_Dc/Fault_V0.*exp.( (Fault_fs.-Fault_f0.-Fault_a_Original*log(Fault_Vp/Fault_V0))./Fault_b_Original )
+    Fault_V_i = Fault_V0*exp.( (Fault_Friction_i.-Fault_f0.-Fault_b_Original.*log.(Fault_Theta_i*Fault_V0./Fault_Dc))./Fault_a_Original )
+
+    
+    return Fault_Dc, Fault_Theta_i, Fault_V_i
+
+end
+
+
 
 function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc, 
     Fault_Theta_i, Fault_V_i, Fault_Friction_i, Fault_NormalStress, Fault_V_Const,
@@ -65,7 +88,7 @@ function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc,
     Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, FaultCenter, Fault_NormalStress, Fault_Friction_i)
 
     # >>>> Set Initial R&S Parameters >>>>
-    Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
+    Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Buijze19!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
 
     
     ###^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^###
