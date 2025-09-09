@@ -3,10 +3,15 @@ using JLD2
 using PolyLog
 
 
-function SetInitialStress_Example!(FaultCount, fault_normalStress, fault_friction_i)
+function SetInitialStress_Example!(FaultCount, fault_center, fault_normalStress, fault_friction_i)
     for i=1:FaultCount
-        fault_normalStress[i] = 50e6
-        fault_friction_i[i] = 0.6
+        if (fault_center[i,3] >= 3900) & (fault_center[i,3] <= 4100)
+            fault_normalStress[i] = 15e6
+            fault_friction_i[i] = 0.7
+        else
+            fault_normalStress[i] = 20e6
+            fault_friction_i[i] = 0.6
+        end
     end
 
     return fault_normalStress, fault_friction_i
@@ -20,16 +25,15 @@ function SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fau
     Fault_Theta_i = zeros(faultcount)
 
     Fault_V0 = 1e-9
-    Fault_V_i .= 1e-10
-    Fault_Dc .= 1e-4 
-    Fault_Theta_i .= 1e3
+    Fault_V_i .= 1e-10 # 1e-10
+    Fault_Dc .= 1e-4 # 1e-4
+    Fault_Theta_i .= 1e3 # 1e3
     
     """ 
     # Fault_f0 .= 0.4
     # Fault_V_i = Fault_V0*exp.( (Fault_Friction_i.-Fault_f0.-Fault_b_Original.*log.(Fault_Theta_i*Fault_V0./Fault_Dc))./Fault_a_Original )
     """
     
-    println( "Size of V_i:  ", size(Fault_V_i),"  ", maximum(Fault_V_i) )
     return Fault_Dc, Fault_Theta_i, Fault_V_i
 
 end
@@ -58,7 +62,7 @@ function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc,
     ###^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^###
     
     # >>>> Set Initial Normal and Shear Stress >>>>
-    Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, Fault_NormalStress, Fault_Friction_i)
+    Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, FaultCenter, Fault_NormalStress, Fault_Friction_i)
 
     # >>>> Set Initial R&S Parameters >>>>
     Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)

@@ -6,5 +6,7 @@ Input_*
 Results/Result_Input.jld2
 Results/Result.jld2
 Results/Result_Example.jld2
+Plot_InitialStress.ipynb
+Plot_ResultSlip.ipynb
 *.png
 *.mp4

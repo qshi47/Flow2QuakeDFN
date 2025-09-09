@@ -20,8 +20,8 @@ LoadingInputFileName="Input_Discretized.jld2"
 
 
 ########################## Simulation Time Set ################################
-TotalStep = 8000 # Total simulation step
-SaveStep = 8000 # Automatically saved every this step
+TotalStep = 4000 # Total simulation step
+SaveStep = 4000 # Automatically saved every this step
 RecordStep = 10 # Simulation sampling rate
 
 

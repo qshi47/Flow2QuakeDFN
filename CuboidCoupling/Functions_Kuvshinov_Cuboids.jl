@@ -1,3 +1,48 @@
+using CSV
+using DataFrames
+
+function Get_Cuboid_Vertices(x, y, z, cube_len_x, cube_len_y, cube_len_z)
+    vertices = [
+        x - cube_len_x/2   y - cube_len_y/2   z - cube_len_z/2;
+        x + cube_len_x/2   y - cube_len_y/2   z - cube_len_z/2;
+        x - cube_len_x/2   y + cube_len_y/2   z - cube_len_z/2;
+        x + cube_len_x/2   y + cube_len_y/2   z - cube_len_z/2;
+        x - cube_len_x/2   y - cube_len_y/2   z + cube_len_z/2;
+        x + cube_len_x/2   y - cube_len_y/2   z + cube_len_z/2;
+        x - cube_len_x/2   y + cube_len_y/2   z + cube_len_z/2;
+        x + cube_len_x/2   y + cube_len_y/2   z + cube_len_z/2
+    ]
+    return vertices
+end
+
+
+function Load_Reservoir_Cuboids(filename)
+    df = CSV.File(filename, header=1, delim=',') |> DataFrame
+    MatrixData = Matrix(df)
+
+    Cuboids_Count = size(MatrixData, 1)
+    Index = MatrixData[:,1]
+    Cuboids_Center = MatrixData[:,2:4]
+    Cuboids_Lengths = MatrixData[:,5:7]
+
+    return Cuboids_Count, Cuboids_Center, Cuboids_Lengths
+end
+
+
+function Calculate_Cuboids_Vertices(Cuboids_Count, Cuboids_Center, Cuboids_Lengths)
+    Cuboids_Vertices = Vector{Matrix{Float64}}(undef, Cuboids_Count)
+
+    for i = 1:Cuboids_Count
+        Cuboids_Vertices[i] = Get_Cuboid_Vertices(
+            Cuboids_Center[i,1], Cuboids_Center[i,2], Cuboids_Center[i,3],
+            Cuboids_Lengths[i,1], Cuboids_Lengths[i,2], Cuboids_Lengths[i,3]
+        )
+    end
+
+    return Cuboids_Vertices
+end
+
+
 function Calculate_Correspondense_Matrix(block_center_pos, pressure_pos) 
     """
         Calculate_Correspondense_Matrix(block_center_pos, pressure_pos) 
@@ -22,6 +67,7 @@ function Calculate_Correspondense_Matrix(block_center_pos, pressure_pos)
     return correspondance_matrix
 
 end
+
 
 function fFunc(x,y,z,R)
     return z*atan((x*y)/(z*R)) - x*log(abs(R + y)) - y*log(abs(R + x))
@@ -203,32 +249,4 @@ function Calculate_PoroDispStress_SingleBlock_FullSpace_GF( ObsPoint, block, blo
     return Disp, Sigma 
 end
 
-function Get_Cube_8Vertices_Pos(CubeOrigin, CubeLengthX, CubeLengthY, CubeThickness)
-    Block = zeros(8,3)
-    Block[1,:] = [CubeOrigin[1]-CubeLengthX/2,CubeOrigin[2]-CubeLengthY/2,CubeOrigin[3]-CubeThickness/2]
-    Block[2,:] = [CubeOrigin[1]+CubeLengthX/2,CubeOrigin[2]-CubeLengthY/2,CubeOrigin[3]-CubeThickness/2]
-    Block[3,:] = [CubeOrigin[1]-CubeLengthX/2,CubeOrigin[2]+CubeLengthY/2,CubeOrigin[3]-CubeThickness/2]
-    Block[4,:] = [CubeOrigin[1]+CubeLengthX/2,CubeOrigin[2]+CubeLengthY/2,CubeOrigin[3]-CubeThickness/2]
-    Block[5,:] = [CubeOrigin[1]-CubeLengthX/2,CubeOrigin[2]-CubeLengthY/2,CubeOrigin[3]+CubeThickness/2]
-    Block[6,:] = [CubeOrigin[1]+CubeLengthX/2,CubeOrigin[2]-CubeLengthY/2,CubeOrigin[3]+CubeThickness/2]
-    Block[7,:] = [CubeOrigin[1]-CubeLengthX/2,CubeOrigin[2]+CubeLengthY/2,CubeOrigin[3]+CubeThickness/2]
-    Block[8,:] = [CubeOrigin[1]+CubeLengthX/2,CubeOrigin[2]+CubeLengthY/2,CubeOrigin[3]+CubeThickness/2]
-    return Block
-end
 
-function Load_Reservoir_Cubes(filename)
-    CubesFile = h5open( filename, "r" )
-    BLOCKS = read( CubesFile["cubes"] )
-    BLOCKS = permutedims(BLOCKS, (3, 2, 1))
-    close(CubesFile)
-
-    BlocksCount = size(BLOCKS)[1]
-    Reservoir_BLOCKS_Vertices_Pos = collect(eachslice(BLOCKS, dims=1))
-
-    Reservoir_BLOCKS_Center_Pos =  zeros(BlocksCount, 3)
-    for i = 1:BlocksCount
-        Reservoir_BLOCKS_Center_Pos[i,:] = (Reservoir_BLOCKS_Vertices_Pos[i][1,:]+Reservoir_BLOCKS_Vertices_Pos[i][end,:])/2
-    end
-    
-    return BlocksCount, Reservoir_BLOCKS_Center_Pos, Reservoir_BLOCKS_Vertices_Pos
-end 
