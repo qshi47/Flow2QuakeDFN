@@ -1,17 +1,84 @@
-# Quake-DFN
+# Flow2QuakeDFN
+> [!WARNING]
+> **Early Stage Code.** This is not a formal release. We're still working on a refined version. 
+> 
 
-Version 1.2 Time Step Optimized. 
+## Introduction
+This project simulates earthquake rupture driven by changes in reservoir pore pressure. The physics underlying involves the coupling between reservoir pore pressure, poro-elastic stress, and rate-and-state fault dynamics. 
 
-Quake-DFN is the boundary element simulator developed for earthquake rupture simulation of discretely distributed faults governed by rate and state friction law. The simulator formulation is consistent with the widely used quasi-dynamic formulation with radiation damping but with a lumped mass representing overshoot effects.
+
+We use the case `Example` to demonstrate the workflow: fluid is injected into a flat reservoir and induces rupture on a planar, dipping fault offset from the injection point. The movie below illustrates the coupled processes and is produced at the end of the workflow.
+
+<video controls src="injection_rupture.mp4" title="Title"></video>
+
+https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
+
+## Dependencies
+- **Julia 1.11+**
+- Packages: Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, PolyLog, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
+
+A detailed description of how to install Julia the Julia packages is in [QuakeDFN_UserGuide_V1.2.pdf](QuakeDFN_UserGuide_V1.2.pdf)
+
+## Workflow
+### Reservoir Mesh 
+Create a computational mesh for the reservoir. In this example, the reservoir consists of a 40 × 40 grid of **cuboid** elements.
+```
+python ReservoirMeshExamples/Example_Generate_Cubes.py
+```
 
 
-Installation Guide:   https://www.youtube.com/watch?v=H8_1SLRd4HA
+You can check the positions of all the reservoir cubes via the *Input_Example_Cubes.txt* file:
 
-Example Simulations (NOTE!! Time Stepping in the code adjusted after this video) (Video taken before timestep adjust):   https://www.youtube.com/watch?v=-HZFHSbxHB8
+![alt text](image_cubes.png)
 
-Simulation Demonstration (v1.1 New): https://www.youtube.com/watch?v=qcVs4QxyRgQ
+### Reservoir Pore Pressure
+Assign the time and pore pressure change for each reservoir cuboid. 
 
-To use, (1) clone the repository (or download the file) and (2) follow the installation guide. It is strongly recommended to follow the example simulations video if you have any plans to use this code. This is the best way to understand and test the code. 
+```
+julia PorePressureExamples/Example_Injection.jl
+``` 
 
-refer to: <br />
-Im, K., Avouac, J.-P. (2024). Quake-DFN: A Software for Simulating Sequences of Induced Earthquakes in a Discrete Fault Network. https://doi.org/10.1785/0120230299
+You can check the pore pressure changes at each time in each reservoir cube in *Input_Example_PorePressureChange.csv*.
+
+![alt text](image_porepressure.png)
+
+
+### Fault Geometry
+Build the bulk fault geometry.
+
+```
+julia InputGeometryExamples/Example_BuildGeometry_Single_Normal.jl
+```
+
+Discretize the fault and generate the fault meshes.
+```
+julia RUN_BUILD_INPUT.jl
+```
+
+### Fault Initial Stress
+Set the initial shear&normal stresses on each fault patch in *QuickParameterAdjust.jl*. This file is executed automatically when running the QuakeDFN simulation `RUN_QUAKEDFN.jl`.
+
+### Fault Poro-elastic Stress Change
+Compute the resulting poroelastic stress changes on each fault patch at each (prescribed) time step. 
+
+
+```
+julia ExternalStressCalculationExamples/Example_PoroStress.jl
+```
+
+This generates the *Input_ExternalStressChange.jld2* file, which contains the computed fault external shear and effective normal stress. *Plot_InitialStress.ipynb* file provides the necessary code to visualize these external stresses. 
+
+![alt text](image_tau.png)
+![alt text](image_sigma.png)
+
+
+### QuakeDFN Simulation
+```
+julia RUN_QUAKEDFN.jl
+```
+
+### Post-processing (Paraview)
+Write results to VTK files for visualization in ParaView.
+```
+julia Plot_ResultWrite2VTK.jl
+```

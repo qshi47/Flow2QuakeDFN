@@ -1,0 +1,14 @@
+__pycache__/
+.vscode/
+Input_Discretized.jld2
+Input_ExternalStressChange.jld2
+Input_*
+Results/Result_Input.jld2
+Results/Result.jld2
+Results/Result_Example.jld2
+Plot_InitialStress.ipynb
+Plot_ResultSlip.ipynb
+Plot_ResultV.ipynb
+Plot_ResultWrite2VTK.jl
+*.png
+*.mp4

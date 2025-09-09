@@ -1,4 +1,37 @@
+function SetInitialStress_Example!(FaultCount, fault_center, fault_normalStress, fault_friction_i)
+    for i=1:FaultCount
+        if (fault_center[i,3] >= 3900) & (fault_center[i,3] <= 4100)
+            fault_normalStress[i] = 20e6
+            fault_friction_i[i] = 0.6
+        else
+            fault_normalStress[i] = 20e6
+            fault_friction_i[i] = 0.6
+        end
+    end
 
+    return fault_normalStress, fault_friction_i
+end
+
+function SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
+    faultcount = size(Fault_a_Original)
+    Fault_V_i = zeros(faultcount)
+    Fault_f0 = zeros(faultcount)
+    Fault_Dc = zeros(faultcount)
+    Fault_Theta_i = zeros(faultcount)
+
+    Fault_V0 = 1e-9
+    Fault_V_i .= 1e-10 # 1e-10
+    Fault_Dc .= 1e-4 # 1e-4
+    Fault_Theta_i .= 1e3 # 1e3
+    
+    """ 
+    # Fault_f0 .= 0.4
+    # Fault_V_i = Fault_V0*exp.( (Fault_Friction_i.-Fault_f0.-Fault_b_Original.*log.(Fault_Theta_i*Fault_V0./Fault_Dc))./Fault_a_Original )
+    """
+    
+    return Fault_Dc, Fault_Theta_i, Fault_V_i
+
+end
 
 function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc, 
     Fault_Theta_i, Fault_V_i, Fault_Friction_i, Fault_NormalStress, Fault_V_Const,
@@ -19,6 +52,12 @@ function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc,
     Count=0; 
     FaultIndex_Adjusted=0
 
+    
+    # >>>> Set Initial Normal and Shear Stress >>>>
+    Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, FaultCenter, Fault_NormalStress, Fault_Friction_i)
+
+    # >>>> Set Initial R&S Parameters >>>>
+    Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
 
     ######################################################################################################
     ############################    Alleviate the fault tip stress change ################################
