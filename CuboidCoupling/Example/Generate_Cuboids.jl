@@ -82,7 +82,7 @@ function main(OutputCubesTXTFilename)
     ]
 
 
-    save_cuboids_to_vtk("CuboidCoupling/Input_Cuboids.vtk", cuboids_all)
+    # save_cuboids_to_vtk("CuboidCoupling/Input_Cuboids.vtk", cuboids_all)
     save_cuboids_to_txt(OutputCubesTXTFilename, cuboids_all)
 
     println("---- TXT file Saved: $(OutputCubesTXTFilename)  ----")

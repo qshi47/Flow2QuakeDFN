@@ -1,4 +1,0 @@
-SwitchSS/RN	ShearMod	PoissonRatio	R_Density	Crit_TooClose	TooCloseNormal_Multiplier	Minimum_NS
-2.0	6.521739130434783e9	0.15	2400.0	1.05	0.6	2.0e6
-Ctr_X	Ctr_Y	Ctr_Z	St_L	Dip_L	StAng	DipAng	LR/RN	a	b	Dc	Theta_i	V_i	Fric_i	Sig0	SigGrad	V_Const	MaxLeng
-0.0	0.0	3000.0	2000.0	800.0	90.0	110.0	1.0	0.003	0.006	0.0001	1000.0	1.0e-10	0.6	0.0	0.0	0.0	20.0

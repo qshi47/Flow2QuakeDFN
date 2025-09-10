@@ -4,81 +4,84 @@
 > 
 
 ## Introduction
-This project simulates earthquake rupture driven by changes in reservoir pore pressure. The physics underlying involves the coupling between reservoir pore pressure, poro-elastic stress, and rate-and-state fault dynamics. 
+This project simulates earthquake rupture driven by changes in reservoir pore pressure. The underlying physics involves the coupling between reservoir pore pressure, poro-elastic stress, and rate-and-state fault dynamics. Flow2Quake can generate both injection-induced (video 1) and depletion-induced (video 2) earthquake rupture. 
 
-
-We use the case `Example` to demonstrate the workflow: fluid is injected into a flat reservoir and induces rupture on a planar, dipping fault offset from the injection point. The movie below illustrates the coupled processes and is produced at the end of the workflow.
-
-<video controls src="injection_rupture.mp4" title="Title"></video>
+**Injection-induced earthquake:**
 
 https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
 
-## Dependencies
-- **Julia 1.11+**
-- Packages: Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, PolyLog, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
+**Depletion-induced earthquake:**
 
-A detailed description of how to install Julia the Julia packages is in [QuakeDFN_UserGuide_V1.2.pdf](QuakeDFN_UserGuide_V1.2.pdf)
+
+
+
+
+
+## Dependencies
+- **Julia:** 1.11+
+- **Packages:** Pkg, PyPlot, PyCall, Conda, DelimitedFiles, JLD2, LinearAlgebra, Printf, SpecialFunctions, StaticArrays, LowRankApprox, Distributed, Statistics, Clustering, PolyLog, ProgressBars, HDF5, CSV, DataFrames, WriteVTK
+
+A detailed tutorial on how to install Julia and Julia packages is in [QuakeDFN_UserGuide_V1.2.pdf](QuakeDFN_UserGuide_V1.2.pdf)
 
 ## Workflow
-### Reservoir Mesh 
-Create a computational mesh for the reservoir. In this example, the reservoir consists of a 40 × 40 grid of **cuboid** elements.
+
+We use `Example`, a simpler depletion-induced case, to demonstrate the workflow. We first generate multiple cuboids that consist the reservoir. A pore pressure generator then gives the spatial heterogeneous and temporal evolving pore pressure in each cuboid. After assigning the fault geometry, elastic modulus and rupture mode, a poro-elastic stress calculator computes the corresponding external shear and normal stresses on each fault patch. Finally, we set the initial stress and initial rate-and-state parameters on fault before running the quasi-dynamic Quake-DFN simulation.  
+
+
+### Reservoir Cuboids
+Create the cuboids for the reservoir. In this example, the reservoir consists of a single cuboid.
 ```
-python ReservoirMeshExamples/Example_Generate_Cubes.py
+julia CuboidCoupling/Example/Generate_Cuboids.jl
 ```
 
 
-You can check the positions of all the reservoir cubes via the *Input_Example_Cubes.txt* file:
+This generates the file containing the position and size of each cuboid `CuboidCoupling/Input_Cuboids.txt`.
 
-![alt text](image_cubes.png)
 
 ### Reservoir Pore Pressure
-Assign the time and pore pressure change for each reservoir cuboid. 
+Assign the temporal pore pressure change in each reservoir cuboid and the corresponding external time. 
 
 ```
-julia PorePressureExamples/Example_Injection.jl
+julia CuboidCoupling/Example/Generate_PorePressure.jl
 ``` 
 
-You can check the pore pressure changes at each time in each reservoir cube in *Input_Example_PorePressureChange.csv*.
+The external time and pore pressure changes are stored in  `CuboidCoupling/Input_PorePressureChange.txt`.
 
-![alt text](image_porepressure.png)
+> [!NOTE]
+> You can use your own mesh-generator and pore pressure solver code to produce `CuboidCoupling/Input_Cuboids.txt` and `CuboidCoupling/Input_PorePressureChange.txt`, as long as their formats remain the same as provided.
+
 
 
 ### Fault Geometry
-Build the bulk fault geometry.
+Build the bulk fault geometry, including fault geometry, elastic modulus and rupture mode. In this example, the fault is a 70° dipping normal fault that cuts the reservoir with no offset.
 
 ```
-julia InputGeometryExamples/Example_BuildGeometry_Single_Normal.jl
+julia CuboidCoupling/Example/Build_Geometry_Single_Normal.jl
 ```
 
-Discretize the fault and generate the fault meshes.
+Discretize the fault, pre-calculate and store the static stress interaction between each fault patch.
 ```
 julia RUN_BUILD_INPUT.jl
 ```
 
-### Fault Initial Stress
-Set the initial shear&normal stresses on each fault patch in *QuickParameterAdjust.jl*. This file is executed automatically when running the QuakeDFN simulation `RUN_QUAKEDFN.jl`.
 
 ### Fault Poro-elastic Stress Change
-Compute the resulting poroelastic stress changes on each fault patch at each (prescribed) time step. 
+
 
 
 ```
-julia ExternalStressCalculationExamples/Example_PoroStress.jl
+julia CuboidCoupling/CalculatePoroElasticStress.jl
 ```
 
-This generates the *Input_ExternalStressChange.jld2* file, which contains the computed fault external shear and effective normal stress. *Plot_InitialStress.ipynb* file provides the necessary code to visualize these external stresses. 
-
-![alt text](image_tau.png)
-![alt text](image_sigma.png)
+This code reads `CuboidCoupling/Input_Cuboids.txt`, `CuboidCoupling/Input_PorePressureChange.txt` and `Input_Discretized.jld2`, calculates the resulting poro-elastic external stress changes on each fault patch at each (prescribed) time, and  generates `Input_ExternalStressChange.jld2`, which contains the computed external fault shear and effective normal stress and is loaded when running the Quake-DFN simulation.
 
 
-### QuakeDFN Simulation
+
+### Fault Initial Condition
+The initial fault conditions can be set in either `CuboidCoupling/Example/Build_Geometry_Single_Normal.jl` or `QuickParameterAdjust.jl`. We recommend systematically set all initial fault stress and rate-and-state parameters in `QuickParameterAdjust.jl`, since it overwrites the initial condition written in the former file. This file is executed automatically when running the Quake-DFN simulation.
+
+
+### Quake-DFN Simulation
 ```
 julia RUN_QUAKEDFN.jl
-```
-
-### Post-processing (Paraview)
-Write results to VTK files for visualization in ParaView.
-```
-julia Plot_ResultWrite2VTK.jl
-```
+``````

@@ -1,5 +1,6 @@
 __pycache__/
 .vscode/
+CuboidCoupling/Functions_Kuvshinov_GPU.jl
 Input_Discretized.jld2
 Input_ExternalStressChange.jld2
 Input_*
