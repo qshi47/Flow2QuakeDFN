@@ -82,12 +82,15 @@ julia RUN_BUILD_INPUT.jl
 julia CuboidCoupling/CalculatePoroElasticStress.jl
 ```
 
-This code reads `CuboidCoupling/Input_Cuboids.txt`, `CuboidCoupling/Input_PorePressureChange.txt` and `Input_Discretized.jld2`, calculates the resulting poro-elastic external stress changes on each fault patch at each (prescribed) time, and  generates `Input_ExternalStressChange.jld2`, which contains the computed external fault shear and effective normal stress and is loaded when running the Quake-DFN simulation.
+This file reads `CuboidCoupling/Input_Cuboids.txt`, `CuboidCoupling/Input_PorePressureChange.txt` and `Input_Discretized.jld2`, calculates the resulting poro-elastic external stress changes on each fault patch at each (prescribed) time, and  generates `Input_ExternalStressChange.jld2`, which contains the computed external fault shear and effective normal stress and is loaded when running the Quake-DFN simulation. In addition, you need to manually specify the criterion for which fault patches experience pore pressure and therefore have effective normal stress $\sigma' = \sigma - P$. 
 
+<img width="529" height="179" alt="image_poro" src="https://github.com/user-attachments/assets/572efd52-e8c7-4e9a-b71c-4e40931ad4c5" />
 
 
 ### Fault Initial Condition
 The initial fault conditions can be set in either `CuboidCoupling/Example/Build_Geometry_Single_Normal.jl` or `QuickParameterAdjust.jl`. We recommend systematically set all initial fault stress and rate-and-state parameters in `QuickParameterAdjust.jl`, since it overwrites the initial condition written in the former file. This file is executed automatically when running the Quake-DFN simulation.
+
+<img width="746" height="474" alt="image_initial" src="https://github.com/user-attachments/assets/de017542-32ba-4f07-aba5-bbaa4c067c10" />
 
 
 ### Quake-DFN Simulation
