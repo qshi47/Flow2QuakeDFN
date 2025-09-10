@@ -61,18 +61,6 @@ function Rotate_Tensor_to_Stress_on_Fault(RotationMat_FromFault, sigEff_all, Fau
 
 end
 
-
-# Input Files 
-Input_Fault_File="Input_Discretized.jld2" 
-Input_Cuboids_File = "CuboidCoupling/Input_Cuboids.txt"
-Input_PorePressure_File = "CuboidCoupling/Input_PorePressure.txt"
-Output_ExternalStress_File = "Input_ExternalStressChange.jld2"
-
-
-function Criterion_for_Fault_within_Reservoir(SingleFaultCenter)
-    return (SingleFaultCenter[3] >= 2900) & (SingleFaultCenter[3] <= 3100 )
-end
-
 function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File, Output_ExternalStress_File)
     # Load Fault parameters
     println("---- Loading Fault and Cuboids  ----")
@@ -212,6 +200,17 @@ function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, 
 
 end
 
+
+# Input Files 
+Input_Fault_File="Input_Discretized.jld2" 
+Input_Cuboids_File = "CuboidCoupling/Input_Cuboids.txt"
+Input_PorePressure_File = "CuboidCoupling/Input_PorePressure.txt"
+Output_ExternalStress_File = "Input_ExternalStressChange.jld2"
+
+# Criterion for Fault within Reservoir
+function Criterion_for_Fault_within_Reservoir(SingleFaultCenter)
+    return (SingleFaultCenter[3] >= 2900) & (SingleFaultCenter[3] <= 3100 )
+end
 
 
 main(Criterion_for_Fault_within_Reservoir, Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File, Output_ExternalStress_File)

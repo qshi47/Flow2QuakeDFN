@@ -20,14 +20,9 @@ function SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fau
     Fault_Theta_i = zeros(faultcount)
 
     Fault_V0 = 1e-9
-    Fault_V_i .= 1e-10 # 1e-10
-    Fault_Dc .= 1e-4 # 1e-4
-    Fault_Theta_i .= 1e3 # 1e3
-    
-    """ 
-    # Fault_f0 .= 0.4
-    # Fault_V_i = Fault_V0*exp.( (Fault_Friction_i.-Fault_f0.-Fault_b_Original.*log.(Fault_Theta_i*Fault_V0./Fault_Dc))./Fault_a_Original )
-    """
+    Fault_V_i .= 1e-10
+    Fault_Dc .= 1e-4
+    Fault_Theta_i .= 1e3 
     
     return Fault_Dc, Fault_Theta_i, Fault_V_i
 
