@@ -12,6 +12,9 @@ https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
 
 **Depletion-induced earthquake:**
 
+https://github.com/user-attachments/assets/8d35f1ac-b337-4a46-9f0b-f034e05bdcc9
+
+
 
 
 
@@ -33,6 +36,7 @@ Create the cuboids for the reservoir. In this example, the reservoir consists of
 ```
 julia CuboidCoupling/Example/Generate_Cuboids.jl
 ```
+<img width="459" height="83" alt="image_cuboids" src="https://github.com/user-attachments/assets/e7d5ec23-11da-4803-8f01-b80bbedf4570" />
 
 
 This generates the file containing the position and size of each cuboid `CuboidCoupling/Input_Cuboids.txt`.
@@ -46,6 +50,7 @@ julia CuboidCoupling/Example/Generate_PorePressure.jl
 ``` 
 
 The external time and pore pressure changes are stored in  `CuboidCoupling/Input_PorePressureChange.txt`.
+<img width="256" height="106" alt="image_porepressure" src="https://github.com/user-attachments/assets/2cc88289-4bca-4f1e-ad0b-39d667a011d6" />
 
 > [!NOTE]
 > You can use your own mesh-generator and pore pressure solver code to produce `CuboidCoupling/Input_Cuboids.txt` and `CuboidCoupling/Input_PorePressureChange.txt`, as long as their formats remain the same as provided.
