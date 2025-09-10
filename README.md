@@ -4,15 +4,17 @@
 > 
 
 ## Introduction
-This project simulates earthquake rupture driven by changes in reservoir pore pressure. The underlying physics involves the coupling between reservoir pore pressure, poro-elastic stress, and rate-and-state fault dynamics. Flow2Quake can generate both injection-induced (video 1) and depletion-induced (video 2) earthquake rupture. 
+Flow2QuakeDFN, based on the latest version (1.2.0) of [Quake-DFN](https://github.com/limkjae/Quake-DFN), simulates earthquake rupture driven by changes in reservoir pore pressure. The underlying physics involves the coupling between reservoir pore pressure, reservoir poro-elastic stress, and fault rate-and-state rupture dynamics. Flow2Quake can generate both injection-induced  ([video 1](#injection-rupture)) and depletion-induced ([video 2](#depltion-rupture)) earthquake rupture. 
 
-**Injection-induced earthquake:**
 
-https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325
+### Injection-induced earthquake
+<a id="injection-rupture"></a>
+<video controls src="https://github.com/user-attachments/assets/70097d5e-351f-428e-918d-bce94bcdc325" title="Injection rupture video"></video>
 
-**Depletion-induced earthquake:**
 
-https://github.com/user-attachments/assets/8d35f1ac-b337-4a46-9f0b-f034e05bdcc9
+### Depletion-induced earthquake
+<a id="depletion-rupture"></a>
+<video controls src="https://github.com/user-attachments/assets/8d35f1ac-b337-4a46-9f0b-f034e05bdcc9" title="Depletion rupture video"></video>
 
 
 
@@ -36,10 +38,12 @@ Create the cuboids for the reservoir. In this example, the reservoir consists of
 ```
 julia CuboidCoupling/Example/Generate_Cuboids.jl
 ```
+
+This generates the file containing the position and size of each cuboid `CuboidCoupling/Input_Cuboids.txt`.
+
 <img width="459" height="83" alt="image_cuboids" src="https://github.com/user-attachments/assets/e7d5ec23-11da-4803-8f01-b80bbedf4570" />
 
 
-This generates the file containing the position and size of each cuboid `CuboidCoupling/Input_Cuboids.txt`.
 
 
 ### Reservoir Pore Pressure
