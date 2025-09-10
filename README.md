@@ -4,7 +4,7 @@
 > 
 
 ## Introduction
-Flow2QuakeDFN, based on the latest version (1.2.0) of [Quake-DFN](https://github.com/limkjae/Quake-DFN), simulates earthquake rupture driven by changes in reservoir pore pressure. The underlying physics involves the coupling between reservoir pore pressure, reservoir poro-elastic stress, and fault rate-and-state rupture dynamics. Flow2Quake can generate both injection-induced  ([video 1](#injection-rupture)) and depletion-induced ([video 2](#depltion-rupture)) earthquake rupture. 
+Flow2QuakeDFN, based on the latest version (1.2.0) of [Quake-DFN](https://github.com/limkjae/Quake-DFN), simulates earthquake rupture driven by changes in reservoir pore pressure. The underlying physics involves the coupling between reservoir pore pressure, reservoir poro-elastic stress, and fault rate-and-state rupture dynamics. This code can generate both injection-induced  ([video 1](#injection-rupture)) and depletion-induced ([video 2](#depletion-rupture)) earthquake rupture. 
 
 
 ### Injection-induced earthquake
