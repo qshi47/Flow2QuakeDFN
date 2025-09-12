@@ -4,6 +4,7 @@ using LinearAlgebra
 using Printf
 using Statistics
 
+
 using ProgressBars
 using HDF5
 
@@ -11,8 +12,13 @@ using HDF5
 using WriteVTK
 using StaticArrays
 
-include("./Functions_Kuvshinov_Tetrahedron_Faces.jl")
+using Distributed
+addprocs(16)  
 
+@everywhere begin
+    include("./Functions_Kuvshinov_Tetrahedron_Faces.jl")
+end
+using SharedArrays
 
 
 function If_FaultPatch_on_Reservoir(Criterion_for_Fault_within_Reservoir::Function, SingleFaultCenter, PorePressureChange, timeidx, idx_nearest_tetrahedron )
@@ -62,13 +68,13 @@ function Rotate_Tensor_to_Stress_on_Fault(RotationMat_FromFault, sigEff_all, Fau
 end
 
 
-
-
 # Input Files 
 Input_Fault_File="Input_Discretized.jld2" 
-Input_Tetrahedron_Faces_File = "TetrahedronCoupling/Input_Tetrahedron.h5"
+Input_Tetrahedrons_File = "TetrahedronCoupling/Input_Tetrahedron.h5"
 Input_PorePressure_File = "TetrahedronCoupling/Input_PorePressure.txt"
 Output_ExternalStress_File = "Input_ExternalStressChange.jld2"
+
+Input_Tetrahedron_Faces_File = Input_Tetrahedrons_File
 
 # Criterion for Fault within Reservoir
 function Criterion_for_Fault_within_Reservoir(SingleFaultCenter)
@@ -76,6 +82,7 @@ function Criterion_for_Fault_within_Reservoir(SingleFaultCenter)
 end
 
 # function main(Criterion_for_Fault_within_Reservoir::Function, Input_Fault_File, Input_Tetrahedron_Faces_File, Input_PorePressure_File, Output_ExternalStress_File)
+
 # Load Fault parameters
 println("---- Loading Fault and Tetrahedron Faces  ----")
 FaultCenter= load(Input_Fault_File, "FaultCenter")
@@ -130,15 +137,33 @@ PoroDisp_1 = zeros(TimeArrayCount,FaultCount)
 PoroDisp_2 = zeros(TimeArrayCount,FaultCount)
 PoroDisp_3 = zeros(TimeArrayCount,FaultCount)
 
-PoroDisp_GF_patch_tetrahedron   = zeros(3, FaultCount, TetrahedronCount) # GF == Green Function
-PoroStress_GF_patch_tetrahedron = zeros(6, FaultCount, TetrahedronCount)
+PoroDisp_GF_patch_tetrahedron   = SharedArray{Float64}(3, FaultCount, TetrahedronCount)
+PoroStress_GF_patch_tetrahedron = SharedArray{Float64}(6, FaultCount, TetrahedronCount)
+
 
 println("---- Calculating Green Functions of Poro Elastic Stresses on Fault ----")
-println("---- (", FaultCount, " * ", TetrahedronCount, " pairs) ----")
+println("---- ($(FaultCount) * $(TetrahedronCount) pairs) on $(nprocs()-1) workers ----")
 
-for i =  tqdm( 1:FaultCount, unit = "fault patch" )
-    for j = 1:TetrahedronCount
-        PoroStress_GF_patch_tetrahedron[:,i,j] = Calculate_PoroStress_SingleTetrahedron_FullSpace_GF(FaultCenter[i,:], Tetrahedrons_faces[j], PwaveModulus, ShearModulus )
+
+@everywhere function _compute_stress!(A, FaultCenter, Tetrahedrons_faces, PwaveModulus, ShearModulus,
+                                    i_start::Int, i_stop::Int, TetrahedronCount::Int)
+    @inbounds @views for i in i_start:i_stop
+        for j in 1:TetrahedronCount
+            A[:, i, j] .= Calculate_PoroStress_SingleTetrahedron_FullSpace_GF(
+                FaultCenter[i, :], Tetrahedrons_faces[j], PwaveModulus, ShearModulus)
+        end
+    end
+    return nothing
+end
+
+# split the outer loop (i) across workers
+chunks = collect(Iterators.partition(1:FaultCount, ceil(Int, FaultCount / (nprocs()-1))))
+
+@sync begin
+    for (w, ch) in zip(workers(), chunks)
+        @async remotecall_wait( _compute_stress!, w,
+            PoroStress_GF_patch_tetrahedron, FaultCenter, Tetrahedrons_faces,
+            PwaveModulus, ShearModulus, first(ch), last(ch), TetrahedronCount)
     end
 end
 

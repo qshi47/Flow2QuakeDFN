@@ -1,5 +1,6 @@
 import gmsh
 import numpy as np
+from tqdm import tqdm
 
 
 def get_vertices(gmsh):
@@ -25,9 +26,11 @@ def save_vertices_to_txt(tetra_coords, filename):
     tetra_coords: (N, 4, 3) array: coords of the 4 vertices of N tetrahedrons
     """
     N = tetra_coords.shape[0]
+    tetra_coords[:, :, 2] *= -1 # Flip Z axis to Z up (right-handed)for consistency with Quake-DFN
+    
     with open(filename, "w") as f:
         f.write(f"Index, X, Y, Z \n")
-        for i in range(N):
+        for i in tqdm( range(N), desc="tetrahedrons"):
             for j in range(4):
                 f.write(f"{i+1}, {tetra_coords[i, j, 0]}, {tetra_coords[i, j, 1]}, {tetra_coords[i, j, 2]}\n")
 

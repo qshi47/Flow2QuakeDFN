@@ -25,7 +25,8 @@ def transfer_vertices_to_faces(tetra_coords):
 
     # Signed volume function
     def signed_tet_volume(a, b, c, d):
-        return np.dot(np.cross(b - a, c - a), d - a) / 6.0
+        sign = -1 # +1 for right-handed, -1 for left-handed
+        return np.dot(sign * np.cross(b - a, c - a), d - a) / 6.0 
 
     # Allocate result
     N = tetra_coords.shape[0]

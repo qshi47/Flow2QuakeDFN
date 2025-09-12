@@ -42,7 +42,7 @@ function BuildBulk()
     Unstable_b=0.006
     Unstable_Dc= 1e-4
     Unstable_Theta=1e3
-    UntableMaximumSegLength = 10.0 # 200.0 | 50.0 | 20.0
+    UntableMaximumSegLength = 40.0 # 200.0 | 50.0 | 20.0
 
 
     ############################# Write Bulk Input #################################

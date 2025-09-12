@@ -68,71 +68,9 @@ function Calculate_PoroDisp_MultipleTetrahedrons_FullSpace_GF(fault_patch, tetra
     return Disp
 end
 
-function Calculate_PoroStress_MultipleTetrahedrons_FullSpace_GF(fault_patch, tetrahedron_faces_vertices, H, G )
-    # fault_patch: Z downward (left-handed)
-    # tetrahedron Green's functions: Z upward (Right-handed)
-   
-    sigma_11 = 0.0
-    sigma_12 = 0.0
-    sigma_13 = 0.0
-    sigma_22 = 0.0
-    sigma_23 = 0.0
-    sigma_33 = 0.0
-
-    pi = 3.1415
-            
-    X = fault_patch[1]
-    Y = fault_patch[2]
-    Z = - fault_patch[3]
-
-    for (idx_tetrahedron, _) in enumerate(tetrahedron_faces_vertices)
-        tetrahedron_faces = tetrahedron_faces_vertices[idx_tetrahedron]
-        for idx_face in 1:4
-            face_points = tetrahedron_faces[idx_face, :, :]
-            X1,Y1,Z1 = face_points[1, 1], face_points[1, 2], face_points[1, 3]
-            X2,Y2,Z2 = face_points[2, 1], face_points[2, 2], face_points[2, 3]
-            X3,Y3,Z3 = face_points[3, 1], face_points[3, 2], face_points[3, 3]
-
-            try 
-                sigma_11 += Tetrahedron_sigma11_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                sigma_12 += Tetrahedron_sigma12_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                sigma_13 += Tetrahedron_sigma13_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                sigma_22 += Tetrahedron_sigma22_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                sigma_23 += Tetrahedron_sigma23_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                sigma_33 += Tetrahedron_sigma33_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-            catch error
-                # println("Use cushion: ", error)
-                try 
-                    cushion = 1e-3
-                    X_temp,Y_temp,Z_temp = X  + cushion, Y, Z
-                    sigma_11 += Tetrahedron_sigma11_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_12 += Tetrahedron_sigma12_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_13 += Tetrahedron_sigma13_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_22 += Tetrahedron_sigma22_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_23 += Tetrahedron_sigma23_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_33 += Tetrahedron_sigma33_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                catch
-                    cushion = 1e-3
-                    X_temp,Y_temp,Z_temp = X - cushion, Y, Z
-                    sigma_11 += Tetrahedron_sigma11_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_12 += Tetrahedron_sigma12_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_13 += Tetrahedron_sigma13_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_22 += Tetrahedron_sigma22_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_23 += Tetrahedron_sigma23_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                    sigma_33 += Tetrahedron_sigma33_v2( X_temp,Y_temp,Z_temp, X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
-                end
-            end
-        end
-    end
-    
-    Sigma = -1/(4*pi*H) * [sigma_11, sigma_22, sigma_33, sigma_12, sigma_13, sigma_23]
-    
-    return Sigma
-end
-
 function Calculate_PoroStress_SingleTetrahedron_FullSpace_GF(fault_patch, tetrahedron_faces_vertices, H, G )
     # fault_patch: Z downward (left-handed)
-    # tetrahedron Green's functions: Z upward (Right-handed)
+    # tetrahedron Green's functions:  Z upward (Right-handed)
     # Return: sigma (compression positive) 
    
     sigma_11 = 0.0
@@ -146,14 +84,16 @@ function Calculate_PoroStress_SingleTetrahedron_FullSpace_GF(fault_patch, tetrah
             
     X = fault_patch[1]
     Y = fault_patch[2]
-    Z = - fault_patch[3]
+    Z = - fault_patch[3] # Change to Z upward (Right-handed)
+
+    # tetrahedron_faces_vertices[:,:,3] *= -1  # Change to Z upward (Right-handed)
 
 
     for idx_face in 1:4
         face_points = tetrahedron_faces_vertices[idx_face, :, :]
-        X1,Y1,Z1 = face_points[1, 1], face_points[1, 2], face_points[1, 3]
-        X2,Y2,Z2 = face_points[2, 1], face_points[2, 2], face_points[2, 3]
-        X3,Y3,Z3 = face_points[3, 1], face_points[3, 2], face_points[3, 3]
+        X1,Y1,Z1 = face_points[1, 1], face_points[1, 2], - face_points[1, 3]
+        X2,Y2,Z2 = face_points[2, 1], face_points[2, 2], - face_points[2, 3]
+        X3,Y3,Z3 = face_points[3, 1], face_points[3, 2], - face_points[3, 3]
 
         try 
             sigma_11 += Tetrahedron_sigma11_v2( X,Y,Z,X1,X2,X3,Y1,Y2,Y3,Z1,Z2,Z3, G )
