@@ -1,16 +1,15 @@
-using DelimitedFiles
-using JLD2
-using LinearAlgebra
 using Printf
+using LinearAlgebra
 using Statistics
 
-
-using ProgressBars
+using DelimitedFiles
+using JLD2
 using HDF5
-
-# for writing to VTK file for Paraview
 using WriteVTK
 using StaticArrays
+
+using ProgressMeter
+using ProgressBars
 
 using Distributed
 addprocs(16)  
@@ -146,25 +145,35 @@ println("---- ($(FaultCount) * $(TetrahedronCount) pairs) on $(nprocs()-1) worke
 
 
 @everywhere function _compute_stress!(A, FaultCenter, Tetrahedrons_faces, PwaveModulus, ShearModulus,
-                                    i_start::Int, i_stop::Int, TetrahedronCount::Int)
+                                      i_start::Int, i_stop::Int, TetrahedronCount::Int)
     @inbounds @views for i in i_start:i_stop
         for j in 1:TetrahedronCount
             A[:, i, j] .= Calculate_PoroStress_SingleTetrahedron_FullSpace_GF(
                 FaultCenter[i, :], Tetrahedrons_faces[j], PwaveModulus, ShearModulus)
         end
     end
-    return nothing
+    nothing
 end
 
-# split the outer loop (i) across workers
-chunks = collect(Iterators.partition(1:FaultCount, ceil(Int, FaultCount / (nprocs()-1))))
+# split outer loop (i) into ≤ nworkers() chunks
+chunks = collect(Iterators.partition(1:FaultCount,
+    ceil(Int, FaultCount / max(1, nworkers()))))
 
-@sync begin
-    for (w, ch) in zip(workers(), chunks)
-        @async remotecall_wait( _compute_stress!, w,
-            PoroStress_GF_patch_tetrahedron, FaultCenter, Tetrahedrons_faces,
-            PwaveModulus, ShearModulus, first(ch), last(ch), TetrahedronCount)
+p = Progress(FaultCount; desc="GF (faults)", dt=0.25)
+
+# launch one task per chunk on a worker
+futs = [@spawnat w _compute_stress!(PoroStress_GF_patch_tetrahedron, FaultCenter, Tetrahedrons_faces,
+                                    PwaveModulus, ShearModulus, first(ch), last(ch), TetrahedronCount)
+        for (w, ch) in zip(workers(), chunks)]
+
+# progress without soft-scope warnings
+let completed = 0
+    for (f, ch) in zip(futs, chunks)
+        wait(f)
+        completed += length(ch)
+        update!(p, completed)
     end
+    finish!(p)
 end
 
 
