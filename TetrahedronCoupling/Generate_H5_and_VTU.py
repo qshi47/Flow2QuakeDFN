@@ -64,11 +64,12 @@ def write_msh_to_vtu(filename_msh, filename_vtu):
 
 
 def main(InputTetrahedronVerticesFilename, OutputTetrahedronFacesFilename):
-
+    print("---- Loading Tetrahedron Vertices ----")
     tetra_vertices_coords = read_vertices_from_txt(f"{InputTetrahedronVerticesFilename}.txt")
     tetra_faces_coords = transfer_vertices_to_faces(tetra_vertices_coords)
 
     # Save as .vtu
+    print("---- Transferring .MESH to .VTU files ----")
     write_msh_to_vtu(f"{InputTetrahedronVerticesFilename}.msh", f"{OutputTetrahedronFacesFilename}.vtu")
     print(f"---- VTU files Saved: {OutputTetrahedronFacesFilename}.vtu ----")
         

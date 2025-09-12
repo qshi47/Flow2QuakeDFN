@@ -1,6 +1,18 @@
-import gmsh, math, os, tempfile
+import gmsh 
 import numpy as np
 from tqdm import tqdm
+
+def translate_mesh_positions(gmsh):
+    nodeTags, nodeCoords, _ = gmsh.model.mesh.getNodes()
+    nodeCoords = list(nodeCoords)  # make mutable
+
+    for k, tag in enumerate(nodeTags):
+        i = 3 * k
+        x = nodeCoords[i]
+        y = nodeCoords[i + 1]
+        z = nodeCoords[i + 2] - 100.0
+        gmsh.model.mesh.setNode(int(tag), [x, y, z], [])  # note the trailing []
+    return gmsh
 
 def get_vertices(gmsh):
     # Get all node coordinates
@@ -44,6 +56,7 @@ gmsh.merge(stl)
 gmsh.model.mesh.removeDuplicateNodes([])
 gmsh.model.mesh.removeDuplicateElements([])
 
+
 # Build topology from the discrete surface (no reparametrization)
 gmsh.model.mesh.createTopology()
 
@@ -60,8 +73,9 @@ gmsh.option.setNumber("Mesh.CharacteristicLengthMax", 25000)
 
 gmsh.model.mesh.generate(3)
 
+gmsh = translate_mesh_positions(gmsh)
+
 gmsh.write("./TetrahedronCoupling/Input_Tetrahedron.msh")   # Gmsh v4 format
-# gmsh.fltk.run()             # uncomment to view
 
 
 tetra_vertices_coords = get_vertices(gmsh)

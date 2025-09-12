@@ -11,6 +11,7 @@ Plot_InitialStress.ipynb
 Plot_ResultSlip.ipynb
 Plot_ResultV.ipynb
 Plot_ResultWrite2VTK.jl
+Plot_InitialVTK.jl
 *.png
 *.mp4
 *.vts
