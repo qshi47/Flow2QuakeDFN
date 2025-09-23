@@ -93,9 +93,18 @@ Cuboids_Vertices = Calculate_Cuboids_Vertices(Cuboids_Count, Cuboids_Center, Cub
 println("Reservoir cuboid count is:  ", Cuboids_Count)
 
 # Load external time array and pore pressure change 
-# from CSV, skipping header
-ExternalStress_TimeArray = readdlm(Input_PorePressure_File, ',', skipstart=1)[:,1]
-PorePressureChange = readdlm(Input_PorePressure_File, ',', skipstart=1)[:,2:end]
+ExternalStress_TimeArray = readdlm(Input_PorePressure_File, ',' )[1,2:end]
+PorePressureChange = readdlm(Input_PorePressure_File, ',')[2:end,2:end]'
+
+ExternalStress_TimeArray = Float64.(ExternalStress_TimeArray)
+PorePressureChange = Float64.(PorePressureChange)
+
+TimeArrayCount = length(ExternalStress_TimeArray)
+
+# Check the size of PorePressureChange should be (TimeArrayCount, FaultCount)
+if size(PorePressureChange, 1) != TimeArrayCount || size(PorePressureChange, 2) != Cuboids_Count
+    error("Size of PorePressureChange should be (TimeArrayCount, Cuboids_Count)")
+end
 
 # Reservoir Elastic Properties
 PwaveModulus = 2 * ShearModulus * (1 - PoissonRatio) / (1 - 2 * PoissonRatio)
@@ -103,7 +112,6 @@ Compressibility = 1/PwaveModulus
 
 # External Poro-elastic Stress Change on Fault 
 # (initial stresses are assigned in QuickParameterChange.jl) 
-TimeArrayCount=length(ExternalStress_TimeArray)
 
 ExternalStress_Normal_Poro = zeros(TimeArrayCount,FaultCount)
 ExternalStress_Shear_Poro  = zeros(TimeArrayCount,FaultCount)
@@ -148,8 +156,8 @@ println("---- Rotating Poro Elastic Tensors to Stress on Fault ----")
 for (TimeIdx, Time) in tqdm( enumerate(ExternalStress_TimeArray), unit = " timestep" )
     for i =1:FaultCount
         # Convention: compression positive + Z downward positive (Left-hand system)
-        PoroDisp_time_patch   = PoroDisp_GF_patch_cuboid[:,i,:]   * PorePressureChange[TimeIdx]
-        PoroStress_time_patch = PoroStress_GF_patch_cuboid[:,i,:] * PorePressureChange[TimeIdx]
+        PoroDisp_time_patch   = PoroDisp_GF_patch_cuboid[:,i,:]   * PorePressureChange[TimeIdx, :]
+        PoroStress_time_patch = PoroStress_GF_patch_cuboid[:,i,:] * PorePressureChange[TimeIdx, :]
 
         PoroDisp_1[TimeIdx,i]   = PoroDisp_time_patch[1] 
         PoroDisp_2[TimeIdx,i]   = PoroDisp_time_patch[2] 

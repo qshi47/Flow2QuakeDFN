@@ -6,23 +6,22 @@ using DataFrames
 include("../Functions_Kuvshinov_Cuboids.jl")
 
 
+
 function Save_time_pressure_to_txt(filename::String, time_array::AbstractVector, pressure::AbstractMatrix)
-    output_matrix = hcat(time_array, pressure)
-    blocksCount = size(pressure, 2)
-
-    # Construct header
-    header = ["time(sec)"]
-    for i in 1:blocksCount
-        push!(header, "cuboid$(i)")
-    end
-
-    # Open file and write header + data
     open(filename, "w") do io
-        write(io, join(header, ", "))           # write header line
-        write(io, "\n")                        # new line after header
-        writedlm(io, output_matrix, ", ")          # write data rows
+        write(io, "time(sec), ")
+        writedlm(io, time_array', ", ")
+        for i in 1:size(pressure, 2)
+            write(io, "cuboid$(i), ")
+            writedlm(io, pressure[:, i]', ", ")
+        end
     end
 end
+
+InputCuboidsFile = "CuboidCoupling/Input_Cuboids.txt"
+OutputPorepressureFile = "CuboidCoupling/Input_PorePressure.txt"
+
+
 
 function main(InputCuboidsFile, OutputPorepressureFile)
     # Load Reservoir Centers
@@ -47,8 +46,6 @@ function main(InputCuboidsFile, OutputPorepressureFile)
 end
 
 
-InputCuboidsFile = "CuboidCoupling/Input_Cuboids.txt"
-OutputPorepressureFile = "CuboidCoupling/Input_PorePressure.txt"
 
 main(InputCuboidsFile, OutputPorepressureFile)
 
