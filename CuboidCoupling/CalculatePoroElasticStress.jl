@@ -70,10 +70,11 @@ end
 Input_Fault_File="Input_Discretized.jld2" 
 Input_Cuboids_File = "CuboidCoupling/Input_Cuboids.txt"
 Input_PorePressure_File = "CuboidCoupling/Input_PorePressure.txt"
+Input_Temperature_File = "CuboidCoupling/Input_Temperature.txt"
 Output_ExternalStress_File = "Input_ExternalStressChange.jld2"
 
 
-# function main(Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File, Output_ExternalStress_File)
+# function main(Input_Fault_File, Input_Cuboids_File, Input_PorePressure_File,Input_Temperature_File, Output_ExternalStress_File)
 
 # Load Fault parameters
 println("---- Loading Fault and Cuboids  ----")
@@ -87,31 +88,39 @@ FaultCount= load(Input_Fault_File, "FaultCount")
 Switch_StrikeSlip_or_ReverseNormal = load(Input_Fault_File, "Switch_StrikeSlip_or_ReverseNormal")
 println("Fault count is:  ", FaultCount)
 
-# Load Reservoir Positions
+# Elastic Properties
+PwaveModulus = 2 * ShearModulus * (1 - PoissonRatio) / (1 - 2 * PoissonRatio)
+Compressibility = 1/PwaveModulus
+BulkModulus = PwaveModulus - 4/3 * ShearModulus
+ThermalExpansivity = 1e-5 # 1/K
+BoitCoefficient = 1.0 
+
+
+# Load Cuboids Positions
 Cuboids_Count, Cuboids_Center, Cuboids_Length = Load_Reservoir_Cuboids(Input_Cuboids_File)
 Cuboids_Vertices = Calculate_Cuboids_Vertices(Cuboids_Count, Cuboids_Center, Cuboids_Length)
 println("Reservoir cuboid count is:  ", Cuboids_Count)
 
-# Load external time array and pore pressure change 
+# Load external time array  
 ExternalStress_TimeArray = readdlm(Input_PorePressure_File, ',' )[1,2:end]
-PorePressureChange = readdlm(Input_PorePressure_File, ',')[2:end,2:end]'
-
 ExternalStress_TimeArray = Float64.(ExternalStress_TimeArray)
-PorePressureChange = Float64.(PorePressureChange)
-
 TimeArrayCount = length(ExternalStress_TimeArray)
+
+# load external pore pressure change
+PorePressureChange = readdlm(Input_PorePressure_File, ',')[2:end,2:end]'
+PorePressureChange = Float64.(PorePressureChange)
 
 # Check the size of PorePressureChange should be (TimeArrayCount, FaultCount)
 if size(PorePressureChange, 1) != TimeArrayCount || size(PorePressureChange, 2) != Cuboids_Count
     error("Size of PorePressureChange should be (TimeArrayCount, Cuboids_Count)")
 end
 
-# Reservoir Elastic Properties
-PwaveModulus = 2 * ShearModulus * (1 - PoissonRatio) / (1 - 2 * PoissonRatio)
-Compressibility = 1/PwaveModulus
+# load external temperature change
+TemperatureChange = readdlm(Input_Temperature_File, ',')[2:end,2:end]'
+TemperatureChange = Float64.(TemperatureChange)
 
-# External Poro-elastic Stress Change on Fault 
-# (initial stresses are assigned in QuickParameterChange.jl) 
+
+# External Poro-elastic Stress Change on Fault (initial stresses are assigned in QuickParameterChange.jl) 
 
 ExternalStress_Normal_Poro = zeros(TimeArrayCount,FaultCount)
 ExternalStress_Shear_Poro  = zeros(TimeArrayCount,FaultCount)
@@ -156,8 +165,10 @@ println("---- Rotating Poro Elastic Tensors to Stress on Fault ----")
 for (TimeIdx, Time) in tqdm( enumerate(ExternalStress_TimeArray), unit = " timestep" )
     for i =1:FaultCount
         # Convention: compression positive + Z downward positive (Left-hand system)
-        PoroDisp_time_patch   = PoroDisp_GF_patch_cuboid[:,i,:]   * PorePressureChange[TimeIdx, :]
-        PoroStress_time_patch = PoroStress_GF_patch_cuboid[:,i,:] * PorePressureChange[TimeIdx, :]
+        EffectivePressureChange = BoitCoefficient * PorePressureChange[TimeIdx, :] + ThermalExpansivity * BulkModulus * TemperatureChange[TimeIdx, :]
+        
+        PoroDisp_time_patch   = PoroDisp_GF_patch_cuboid[:,i,:]   * EffectivePressureChange
+        PoroStress_time_patch = PoroStress_GF_patch_cuboid[:,i,:] * EffectivePressureChange
 
         PoroDisp_1[TimeIdx,i]   = PoroDisp_time_patch[1] 
         PoroDisp_2[TimeIdx,i]   = PoroDisp_time_patch[2] 
