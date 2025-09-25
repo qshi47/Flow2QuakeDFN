@@ -48,11 +48,11 @@ function ParameterAdj(LoadingFaultCount, FaultMass, Fault_a, Fault_b, Fault_Dc,
     FaultIndex_Adjusted=0
 
     
-    # >>>> Set Initial Normal and Shear Stress >>>>
-    Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, FaultCenter, Fault_NormalStress, Fault_Friction_i)
+    # # >>>> Set Initial Normal and Shear Stress >>>>
+    # Fault_NormalStress, Fault_Friction_i  = SetInitialStress_Example!(FaultCount, FaultCenter, Fault_NormalStress, Fault_Friction_i)
 
-    # >>>> Set Initial R&S Parameters >>>>
-    Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
+    # # >>>> Set Initial R&S Parameters >>>>
+    # Fault_Dc, Fault_Theta_i, Fault_V_i = SetInitialRSParameters_Example!(Fault_a_Original, Fault_b_Original, Fault_Friction_i)
 
     ######################################################################################################
     ############################    Alleviate the fault tip stress change ################################
