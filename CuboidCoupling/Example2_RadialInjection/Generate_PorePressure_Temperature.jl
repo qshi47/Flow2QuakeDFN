@@ -51,7 +51,7 @@ function main(InputCuboidsFile, OutputPorepressureFile, OutputTemperatureFile)
     # Pore Pressure Change
     InjectionOrigin = [-1000, 0, 3000]
     MyDiffusivity = 1e-2 # m/second  # 1e-2: 10yr ~ 2000m
-    MyP_star = 4e6 # Pa
+    MyP_star = 4e7 # Pa
 
     PorePressureChange = Porepressure_Injection(ExternalStress_TimeArray, Cuboids_Center, InjectionOrigin, MyP_star, MyDiffusivity)
 

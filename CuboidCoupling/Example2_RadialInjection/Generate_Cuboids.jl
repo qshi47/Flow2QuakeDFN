@@ -93,7 +93,7 @@ function main(OutputCubesTXTFilename)
     Center    = (-1000, 0, 3000.0)
     Cuboid_side_len   = 100.0
     Cuboid_side_number = 40
-    Thickness = 200.0
+    Thickness = 400.0
 
     cuboids_all = get_all_cubes_vertices(Center, Cuboid_side_len, Thickness, Cuboid_side_number)
 
