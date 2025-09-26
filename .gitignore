@@ -7,3 +7,7 @@ Results/Result.jld2
 Results/Result_Example.jld2
 *.png
 *.mp4
+*.vtu
+*.vtk
+*.vts
+*.pvd
