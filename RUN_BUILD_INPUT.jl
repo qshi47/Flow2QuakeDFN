@@ -9,7 +9,7 @@ using LinearAlgebra
 using Distributed
 @pyimport matplotlib.patches as patches
 
-pygui(true)
+pygui(false)
 
 include("Functions_BuildInputFile.jl")
 include("Functions_OKADA3D.jl")

@@ -81,7 +81,7 @@ function write_time_series_vtk(base_filename, coordinates, result_data, result_t
     end
 
     # Write the PVD file to link all time steps
-    # write_pvd(base_filename * ".pvd", vts_filenames, result_time)
+    write_pvd(base_filename * ".pvd", vts_filenames, result_time)
 end
 
 function write_result_to_vtk_files(OutputFolder, LoadingInputFileName, DataFileName)
@@ -114,7 +114,7 @@ end
 
 
 Folder = "VTK/" # "/home/qshi2/tecto-data1/"
-FileString = "Fault_vtu" 
+FileString = "Fault_Point_vtu" 
 
 LoadingInputFileName = "Input_Discretized.jld2" 
 DataFileName = "Results/Result.jld2"

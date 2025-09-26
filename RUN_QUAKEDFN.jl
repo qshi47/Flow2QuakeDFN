@@ -8,7 +8,7 @@ using LinearAlgebra
 using Printf
 using SpecialFunctions
 using StaticArrays
-pygui(true)
+pygui(false)
 
 include("Functions_Solvers.jl")
 include("Functions_RSFDFN3DMain_D.jl")
@@ -22,8 +22,8 @@ LoadingInputFileName="Input_Discretized.jld2"
 
 
 ########################## Simulation Time Set ################################
-TotalStep = 10000 # Total simulation step
-SaveStep = 5000 # Automatically saved every this step
+TotalStep = 3000 # Total simulation step
+SaveStep = 3000 # Automatically saved every this step
 RecordStep = 10 # Simulation sampling rate
 
 
