@@ -30,16 +30,17 @@ function main(InputCuboidsFile, OutputPorepressureFile, OutputTemperatureFile)
     Time_Count =  2
     ExternalStress_TimeArray = zeros(Time_Count)
     ExternalStress_TimeArray[1]  = 0
-    ExternalStress_TimeArray[2] = 10*365*24*3600 # 10 years in seconds
+    ExternalStress_TimeArray[2] =  50*24*3600 # 50 days (in seconds) 
+    # 10*365*24*3600 # 10 years (in seconds)
 
     # Pore Pressure Change
     PorePressureChange = zeros(Time_Count, Cuboids_Count)
     PorePressureChange[1,:] .= 0.0
-    PorePressureChange[2,:] .= -30e6 # -30 MPa
+    PorePressureChange[2,:] .= 0.0 # -30e6 # Unit: [Pa]
 
     TemperatureChange = zeros(Time_Count, Cuboids_Count)
     TemperatureChange[1,:] .= 0.0
-    TemperatureChange[2,:] .= 0.0 # No temperature change
+    TemperatureChange[2,:] .= -50.0 # Unit: [K]
 
     # Save Pore Pressure Change to a txt file
     Save_time_data_to_txt(OutputPorepressureFile, ExternalStress_TimeArray, PorePressureChange)
